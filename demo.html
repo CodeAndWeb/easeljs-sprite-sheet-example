@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>EaselJS: Simple SpriteSheet Example</title>
+
+    <script src="./createjs/easeljs.js"></script>
+    <script src="./createjs/preloadjs.js"></script>
+
+    <style>
+        html, body, div
+        {
+            padding:0;
+            margin: 0;
+        }
+        body
+        {
+            width:100%;
+            height:100%;
+            margin: 0;
+            overflow: hidden;
+            background-color: white;
+        }
+
+        canvas
+        {
+            background-color: #d5f2ef;
+            width:100%;
+        }
+    </style>
+
+    <script>
+        var assets = [];
+        var betty;
+        var stage;
+        var spriteSheet;
+
+        function init()
+        {
+            var manifest = [
+                {src: "sheet.json", id: "sheet1", type: "spritesheet"}
+            ];
+
+            var loader = new createjs.LoadQueue(true, "./");
+            loader.on("fileload", handleFileLoad);
+            loader.on("complete", handleComplete);
+            loader.loadManifest(manifest);
+        }
+
+        function handleFileLoad(event)
+        {
+            assets.push(event);
+        }
+
+        function handleComplete()
+        {
+            for (var i = 0; i < assets.length; i++)
+            {
+                var event = assets[i];
+                var result = event.result;
+
+                switch (event.item.id)
+                {
+                    case 'sheet1':
+                        spriteSheet = result;
+                        break;
+                }
+            }
+
+            initScene();
+        }
+
+        function initScene()
+        {
+            stage = new createjs.Stage(document.getElementById("testCanvas"));
+
+            for (var i = 0; i < 5; i++)
+            {
+                var floor = new createjs.Sprite(spriteSheet, "Floor");
+                floor.x = i * 256;
+                floor.y = 400;
+                stage.addChild(floor);
+            }
+
+            betty = new createjs.Sprite(spriteSheet, "RunRight");
+            betty.x = stage.canvas.width / 2;
+            betty.y = 400;
+            stage.addChild(betty);
+
+            // Add Betty to the stage, and add her as a listener to Ticker to get updates each frame.
+            createjs.Ticker.on("tick", tick);
+
+            createjs.Ticker.timingMode = createjs.Ticker.RAF;
+            createjs.Ticker.addEventListener("tick", stage);
+        }
+
+        function tick(e)
+        {
+            betty.x = (betty.x + e.delta * 0.5) % stage.canvas.width;
+        }
+
+    </script>
+</head>
+
+<body onload="init();">
+<div>
+    <canvas id="testCanvas" width="960" height="540"></canvas>
+</div>
+</body>
+</html>
